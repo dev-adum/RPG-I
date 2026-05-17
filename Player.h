@@ -30,6 +30,7 @@ public:
 	sf::SoundBuffer fireBuffer2;
 	sf::Sound fireSound1;
 	sf::Sound fireSound2;
+
 	sf::Music VoidTrack;
 	sf::Sound walkSound;
 
@@ -53,6 +54,28 @@ public:
 	sf::IntRect frame_15;
 	sf::IntRect frame_16;
 
+	sf::IntRect frame_17;
+	sf::IntRect frame_18;
+	sf::IntRect frame_19;
+	sf::IntRect frame_20;
+
+	sf::IntRect frame_21;
+	sf::IntRect frame_22;
+	sf::IntRect frame_23;
+	sf::IntRect frame_24;
+
+	sf::IntRect frame_25;
+	sf::IntRect frame_26;
+	sf::IntRect frame_27;
+	sf::IntRect frame_28;
+
+	sf::IntRect frame_29;
+	sf::IntRect frame_30;
+	sf::IntRect frame_31;
+	sf::IntRect frame_32;
+
+
+
 	std::vector<sf::IntRect> SouthWest;
 	std::vector<sf::IntRect> South;
 	std::vector<sf::IntRect> SouthEast;
@@ -62,8 +85,25 @@ public:
 	std::vector<sf::IntRect> NorthWest;
 	std::vector<sf::IntRect> West;
 
+	std::vector<sf::IntRect> SouthWestFire;
+	std::vector<sf::IntRect> SouthFire;
+	std::vector<sf::IntRect> SouthEastFire;
+	std::vector<sf::IntRect> EastFire;
+	std::vector<sf::IntRect> NorthEastFire;
+	std::vector<sf::IntRect> NorthFire;
+	std::vector<sf::IntRect> NorthWestFire;
+	std::vector<sf::IntRect> WestFire;
+
+
 	std::vector<sf::IntRect> Target;
+	
 	const std::vector<sf::IntRect>* anim = &South;
+	const std::vector<sf::IntRect>* fire_anim = &SouthFire;
+
+	float fireCutoff = 0.08f; // 80ms burst
+	float fireSoundTimer = 0.f;
+	bool fireSoundPlaying = false;
+
 
 
 	unsigned int sw_idx = 0;
@@ -75,7 +115,22 @@ public:
 	unsigned int nw_idx = 0;
 	unsigned int w_idx = 0;
 
+	unsigned int sw_fire_idx = 0;
+	unsigned int s_fire_idx = 0;
+	unsigned int se_fire_idx = 0;
+	unsigned int e_fire_idx = 0;
+	unsigned int ne_fire_idx = 0;
+	unsigned int n_fire_idx = 0;
+	unsigned int nw_fire_idx = 0;
+	unsigned int w_fire_idx = 0;
+
+
+
 	unsigned int targ_idx = 0;
+
+	float fire_anim_timer = 0.0f;
+	float const fire_anim_speed = 0.15f;
+	bool isFiring = false;
 
 	float player_anim_timer = 0.0f;
 	float const player_anim_speed = 0.15f;
@@ -84,5 +139,6 @@ public:
 	float const target_anim_speed = 0.8f;
 	unsigned int* currentIdx = &s_idx;
 
+	float bulletVolume = 50.f;
 
 };

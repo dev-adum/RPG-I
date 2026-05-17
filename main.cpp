@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "Bullet.h"
-#include "FadingSound.h"
+#include "BulletSystem.h"
+#include "Input.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
@@ -26,12 +27,10 @@ sf::Vector2f NormalizeVector(sf::Vector2f vector)
 
 int main()
 { 
-
+    Input input;
     Player player;
-    FadingSound sound;
+    BulletSystem bulletSystem;
 
-    Bullet bullet;
-    std::vector<Bullet> bullets;
     sf::Vector2f lastDir(1.f, 0.f);
 
     float fireCooldown = 0.25f;
@@ -41,9 +40,6 @@ int main()
     player.Load();
     player.Initialize();
 
-    bullet.Initialize();
-   
-    
     srand(time(nullptr));
 
 
@@ -63,7 +59,7 @@ int main()
    }
 
     sf::Clock clock;
-    sf::Vector2f dir(0.f, 0.f);
+   
 
     sf::Text text(font);
     text.setString("Move: Arrows/WASD  \n Fire: LMB or 'F'");
@@ -75,9 +71,15 @@ int main()
     while (window.isOpen())
     {
         
-        dir = sf::Vector2f(0.f, 0.f);
+        sf::Vector2f clampedMouse = player.GetClampedAim(window, maxAimDistance);
+        player.targetSprite.setPosition(clampedMouse);
+        sf::Vector2f dir = input.GetMovement();
         float const delta_time = clock.restart().asSeconds();
-
+        sf::Vector2f start = player.playerSprite.getPosition();
+        sf::Vector2f aimDir = NormalizeVector(clampedMouse - start);
+        
+        bulletSystem.Update(delta_time);
+        player.Update(dir, aimDir, delta_time);
 
         while (const std::optional event = window.pollEvent())
         {
@@ -105,99 +107,41 @@ int main()
             
             }
         }
-
-        
-        sf::Vector2f clampedMouse = player.GetClampedAim(window, maxAimDistance);
-        player.targetSprite.setPosition(clampedMouse);
-      
-
-            if
-                (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) ||
-                    sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-            {
-                dir.y -= 1.f;
-            }
-
-            if
-                (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) ||
-                    sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-            {
-                dir.y += 1.f;
-            }
-
-            if
-                (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||
-                    sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-            {
-                dir.x += 1.f;
-            }
-
-            if
-                (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
-                    sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-            {
-                dir.x -= 1.f;
-            }
-
-            float fireCooldown = 0.25f;
-           
+       
 
 
-            fireTimer += delta_time;
+        bulletSystem.Update(delta_time);
 
-            if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
-                && fireTimer >= fireCooldown)
-            {
-                fireTimer = 0.f;
+   
+        static float fireTimer = 0.f;
 
-                Bullet b;
-                b.Initialize();
-                
-                sf::Vector2f startPos = player.playerSprite.getPosition();
+        fireTimer += delta_time;
 
-                sf::Vector2f dir = NormalizeVector(clampedMouse - startPos);
+        bool fireHeld = input.FirePressed();
 
-                b.shape.setPosition(startPos);
-                b.direction = dir;
-
-                bullets.push_back(b);
-
-                player.fireSound1.play();
-            }
-
-            sf::Vector2f aimDir = NormalizeVector(clampedMouse - player.playerSprite.getPosition());
-
-            player.Update(dir, aimDir, delta_time);
-
-
-
-
-
-
-        for (auto& b : bullets)
+        if (fireHeld && fireTimer >= fireCooldown)
         {
-            b.shape.move(b.direction * bullet.bulletSpeed);
-            b.life -= delta_time;
+            fireTimer = 0.f;
+
+            bulletSystem.Shoot(start, aimDir);
+
+            sf::Sound* s = (rand() % 2 == 0)
+                ? &player.fireSound1
+                : &player.fireSound2;
+
+            s->setVolume(player.bulletVolume);
+            s->stop();
+            s->play();
         }
 
-        bullets.erase(
-            std::remove_if(bullets.begin(), bullets.end(),
-                [](const Bullet& b) { return b.life <= 0.f; }),
-            bullets.end()
-        );
 
-     
         
         window.clear();
+        
         window.draw(player.playerSprite);
         window.draw(player.targetSprite);
         window.draw(text);
-        
-        for (auto& b : bullets)
-        {
-            window.draw(b.shape);
-        }
-     
+        bulletSystem.Draw(window);
         window.display();
         window.setView(window.getView());
         window.setMouseCursorVisible(false);
