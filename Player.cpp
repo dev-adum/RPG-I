@@ -3,12 +3,12 @@
 
 Player::Player()
     : playerSprite(playerTexture),
-    targetSprite(targetTexture),
+    reticuleSprite(reticuleTexture),
     walkSound(walkBuffer),
     VoidTrack(),
     fireSound1(fireBuffer1),
     fireSound2(fireBuffer2)
-
+   
 {
 
 }
@@ -23,9 +23,9 @@ void Player::Load()
         std::cout << "Failed to load Player_Walk.png\n";
     }
 
-    if (!targetTexture.loadFromFile("Assets/Player/Textures/Target_Point.png"))
+    if (!reticuleTexture.loadFromFile("Assets/Player/Textures/Reticule_Mark.png"))
     {
-        std::cout << "Failed to load Target_Point.png\n";
+        std::cout << "Failed to load Reticule_Mark.png\n";
     }
 
     if (!walkBuffer.loadFromFile("Assets/Player/SFX/Player_Step.wav"))
@@ -46,6 +46,7 @@ void Player::Load()
         std::cout << "Failed to load Bang_2.wav\n";
     }
 
+   
 
 
     if (!VoidTrack.openFromFile("Assets/Music/Void/VoidTrack.wav"))
@@ -63,7 +64,21 @@ void Player::Load()
 
 void Player::Initialize()
 {
-   sf::IntRect frame_1({ 0, 0 }, { 64, 64 });
+    sf::Vector2f playerPos = playerSprite.getPosition();
+ 
+  
+        playerBoxSize = sf::Vector2i({ 16,32 });
+
+        playerBox.setFillColor(sf::Color::Transparent);
+        playerBox.setOutlineColor(sf::Color::Transparent);
+        playerBox.setOutlineThickness(1);
+        playerBox.setSize(sf::Vector2f(playerBoxSize.x, playerBoxSize.y));
+        playerBox.setOrigin({ 9,10 });
+   
+
+
+
+    sf::IntRect frame_1({ 0, 0 }, { 64, 64 });
    sf::IntRect frame_2({ 64, 0 }, { 64, 64 });
    sf::IntRect frame_3({ 128, 0 }, { 64, 64 });
    sf::IntRect frame_4({ 192, 0 }, { 64, 64 });
@@ -104,13 +119,10 @@ void Player::Initialize()
    sf::IntRect frame_32({ 448, 192 }, { 64, 64 });
 
     
-    sf::Vector2f position = playerSprite.getPosition();
-    
-    sf::Vector2f pos = playerSprite.getPosition();
 
     
     playerSprite.setOrigin({ 32.f, 32.f });
-    targetSprite.setOrigin({ 32.f, 32.f });
+    reticuleSprite.setOrigin({ 32.f, 32.f });
     
     
 
@@ -135,44 +147,10 @@ void Player::Initialize()
 
 
 
-	Target = { frame_1, frame_2 };
+	Reticule = { frame_1, frame_2 };
 
 
 
-    
-    // define body (feet area)
-    float bodyW = 8.f;
-    float bodyH = 16.f;
-
-    // shift it DOWN inside the 64x64 frame
-    float offsetY = 64.f / 2.f - bodyH / 2.f;
-
-    float bodyLeft = pos.x - bodyW / 2.f;
-    float bodyTop = pos.y + offsetY - bodyH / 2.f;
-
-    float minX = 0.f;
-    float minY = 0.f;
-    float maxX = 150.f;
-    float maxY = 150.f;
-
-    // left
-    if (bodyLeft < minX)
-        pos.x += (minX - bodyLeft);
-
-    // right
-    if (bodyLeft + bodyW > maxX)
-        pos.x -= (bodyLeft + bodyW - maxX);
-
-    // top
-    if (bodyTop < minY)
-        pos.y += (minY - bodyTop);
-
-    // bottom
-    if (bodyTop + bodyH > maxY)
-        pos.y -= (bodyTop + bodyH - maxY);
-
-    playerSprite.setPosition(pos);
-    
 
 }
 
@@ -202,11 +180,16 @@ sf::Vector2f Player::GetClampedAim(sf::RenderWindow& window, float maxDistance)
 
 
 
-
-void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time)
+void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy)
 {
-    isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)
-        || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F);
+    sf::Vector2f playerPos = playerSprite.getPosition();
+
+
+
+
+
+    isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
     bool isMoving = (dir.x != 0.f || dir.y != 0.f);
 
 
@@ -228,6 +211,7 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time)
     else if (angle < 67.5f)
     {
         anim = &SouthEast;
+
         currentIdx = &se_idx;
     }
     else if (angle < 112.5f)
@@ -260,8 +244,7 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time)
         anim = &NorthEast;
         currentIdx = &ne_idx;
     }
-    
-    playerSprite.move(dir * 0.075f);
+
 
 
     if (isMoving)
@@ -310,7 +293,7 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time)
 
 
     player_anim_timer += delta_time;
-    
+
     if (isMoving)
     {
 
@@ -327,15 +310,15 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time)
         player_anim_timer = 0.f;
     }
 
-    target_anim_timer += delta_time;
-    
-    if (target_anim_timer >= target_anim_speed)
+    reticule_anim_timer += delta_time;
+
+    if (reticule_anim_timer >= reticule_anim_speed)
     {
-        target_anim_timer = 0.f;
-        targ_idx = (targ_idx + 1) % Target.size();
+        reticule_anim_timer = 0.f;
+        targ_idx = (targ_idx + 1) % Reticule.size();
     }
-    
-    targetSprite.setTextureRect((Target[targ_idx]));
+
+    reticuleSprite.setTextureRect((Reticule[targ_idx]));
 
     const std::vector<sf::IntRect>* finalAnim = anim;
     unsigned int* finalIdx = currentIdx;
@@ -382,5 +365,77 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time)
 
     if (finalAnim && *finalIdx < finalAnim->size())
         playerSprite.setTextureRect((*finalAnim)[*finalIdx]);
+
+    sf::Vector2f center = view.getCenter();
+    sf::Vector2f size = view.getSize();
+
+    float minX = center.x - size.x / 2.f;
+    float maxX = center.x + size.x / 2.f;
+    float minY = center.y - size.y / 2.f;
+    float maxY = center.y + size.y / 2.f;
+
+
+    // define body (feet area)
+    float bodyW = 16.f;
+    float bodyH = 16.f;
+
+    // shift it DOWN inside the 64x64 frame
+    float offsetY = 10.f / 2.f - bodyH / 2.f;
+
+    float bodyLeft = playerPos.x - bodyW / 2.f;
+    float bodyTop = playerPos.y + offsetY - bodyH / 2.f;
+
+
+
+    // left
+    if (bodyLeft < minX)
+        playerPos.x += (minX - bodyLeft);
+
+    // right
+    if (bodyLeft + bodyW > maxX)
+        playerPos.x -= (bodyLeft + bodyW - maxX);
+
+    // top
+    if (bodyTop < minY)
+        playerPos.y += (minY - bodyTop);
+
+    // bottom
+    if (bodyTop + bodyH > maxY)
+        playerPos.y -= (bodyTop + bodyH - maxY);
+
+
+
+
+
+
+
+
+
+    sf::Vector2f currentPos = playerSprite.getPosition();
+    sf::Vector2f move = dir * moveSpeed * delta_time;
+
+    // move hitbox first
+    playerBox.move(move);
+
+    // collision (box vs box)
+    if (Math::DetectCollision(
+        playerBox.getGlobalBounds(),
+        enemy.enemyBox.getGlobalBounds()))
+    {
+        // undo move
+        playerBox.move(-move);
+    }
+
+    // sync visuals AFTER physics
+    sf::Vector2f pos = playerBox.getPosition();
+    playerSprite.setPosition(pos);
+   
+}
+
+void Player::Draw(sf::RenderWindow& window)
+{
+    window.draw(playerSprite);
+    window.draw(reticuleSprite);
+    window.draw(playerBox);
 
 }

@@ -1,18 +1,30 @@
 #include "BulletSystem.h"
 
-void BulletSystem::Update(float dt)
+
+void BulletSystem::Update(float delta_time, Enemy& enemy)
 {
-    fireTimer += dt;
+    fireTimer += delta_time;
 
     for (auto& b : bullets)
     {
         b.shape.move(b.direction * b.bulletSpeed);
-        b.life -= dt;
+        b.life -= delta_time;
+
+        if (Math::DetectCollision(
+            b.shape.getGlobalBounds(),
+            enemy.enemyBox.getGlobalBounds()))
+        {
+            enemy.hitSound1.play();
+            b.dead = true;
+        }
     }
 
     bullets.erase(
         std::remove_if(bullets.begin(), bullets.end(),
-            [](const Bullet& b) { return b.life <= 0.f; }),
+            [](const Bullet& b)
+            {
+                return b.life <= 0.f || b.dead;
+            }),
         bullets.end()
     );
 }
@@ -24,9 +36,8 @@ void BulletSystem::Shoot(sf::Vector2f start, sf::Vector2f dir)
 
     fireTimer = 0.f;
 
-    Bullet b;
-    b.Initialize();
-
+    Bullet b; 
+    b.shape.setSize({ 2.f, 2.f });
     b.shape.setPosition(start);
     b.direction = dir;
 

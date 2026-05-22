@@ -2,7 +2,10 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include "Math.h"
+#include "Enemy.h"
 
+class Enemy;
 
 class Player
 {
@@ -12,24 +15,32 @@ public:
 
 	void Load();
 	void Initialize();
-	void Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time);
-	
+	void Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy);
+	void Draw(sf::RenderWindow& window);
+
+	sf::RectangleShape playerBox;
+
+	sf::Vector2i playerBoxSize;
+
+
 
 	sf::Vector2f GetClampedAim(sf::RenderWindow& window, float maxDistance);
 
 	sf::Texture playerTexture;
 	sf::Sprite playerSprite;
 
-	sf::Vector2f pos;
+	sf::Vector2f playerPos;
 
-	sf::Texture targetTexture;
-	sf::Sprite targetSprite;
+	sf::Texture reticuleTexture;
+	sf::Sprite reticuleSprite;
 
 	sf::SoundBuffer walkBuffer;
 	sf::SoundBuffer fireBuffer1;
 	sf::SoundBuffer fireBuffer2;
+	
 	sf::Sound fireSound1;
 	sf::Sound fireSound2;
+	
 
 	sf::Music VoidTrack;
 	sf::Sound walkSound;
@@ -95,7 +106,7 @@ public:
 	std::vector<sf::IntRect> WestFire;
 
 
-	std::vector<sf::IntRect> Target;
+	std::vector<sf::IntRect> Reticule;
 	
 	const std::vector<sf::IntRect>* anim = &South;
 	const std::vector<sf::IntRect>* fire_anim = &SouthFire;
@@ -104,6 +115,8 @@ public:
 	float fireSoundTimer = 0.f;
 	bool fireSoundPlaying = false;
 
+	float fireCooldown = 0.25f;
+	float fireTimer = 0.f;
 
 
 	unsigned int sw_idx = 0;
@@ -125,6 +138,9 @@ public:
 	unsigned int w_fire_idx = 0;
 
 
+	float moveSpeed = 250.f;
+	
+
 
 	unsigned int targ_idx = 0;
 
@@ -135,10 +151,10 @@ public:
 	float player_anim_timer = 0.0f;
 	float const player_anim_speed = 0.15f;
 
-	float target_anim_timer = 0.0f;
-	float const target_anim_speed = 0.8f;
+	float reticule_anim_timer = 0.0f;
+	float const reticule_anim_speed = 0.8f;
 	unsigned int* currentIdx = &s_idx;
 
-	float bulletVolume = 50.f;
+	float bulletVolume = 40.f;
 
 };

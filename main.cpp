@@ -1,7 +1,9 @@
 #include "Player.h"
-#include "Bullet.h"
+#include "Enemy.h"
 #include "BulletSystem.h"
 #include "Input.h"
+#include "UIManager.h"
+#include "Math.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
@@ -10,111 +12,111 @@
 #include <ctime>
 
 
-
-sf::Vector2f NormalizeVector(sf::Vector2f vector)
-{
-    float m = std::sqrt(vector.x * vector.x + vector.y * vector.y);
-
-    sf::Vector2f normalizedVector;
-
-    normalizedVector.x = vector.x / m;
-    normalizedVector.y = vector.y / m;
-
-    return normalizedVector;
-}
-
-
-
 int main()
 { 
     Input input;
     Player player;
+    Enemy enemy;
     BulletSystem bulletSystem;
+    UIManager ui;
+  
+    enemy.Load();
+    enemy.Initialize();
+
+    player.Load();
+    player.Initialize();
+    
+    ui.Load();
 
     sf::Vector2f lastDir(1.f, 0.f);
+    
+    
+    const float WORLD_W = 600.f;
+    const float WORLD_H = 600.f;
+    sf::View gameView(sf::FloatRect({ 0.f, 0.f }, { WORLD_W, WORLD_H }));
 
     float fireCooldown = 0.25f;
     float fireTimer = 0.f;
     float maxAimDistance = 150.f;
 
-    player.Load();
-    player.Initialize();
-
-    srand(time(nullptr));
-
-
-    const sf::Vector2f view_size = { 500.f, 500.f };
-    sf::RenderWindow window(sf::VideoMode({ 500, 500 }), "Level I");
-    sf::View view(sf::FloatRect({ 0.f, 0.f }, { 500.f, 500.f }));
-    window.setView(view);
-    sf::Vector2u windowSize = window.getSize();
-
-
-   
-
-    sf::Font font;
-    if (!font.openFromFile("Assets/Fonts/Helvetica.ttf"))
-    {
-       return EXIT_FAILURE;
-   }
-
+    srand(static_cast<unsigned int>(time(nullptr)));
     sf::Clock clock;
+
+
+    const sf::Vector2f view_size = { 600.f, 600.f };
+    sf::RenderWindow window(sf::VideoMode({ 600, 600 }), "Level I");
+    window.setVerticalSyncEnabled(true);
+   
+    sf::Vector2u windowSize = window.getSize();
    
 
-    sf::Text text(font);
-    text.setString("Move: Arrows/WASD  \n Fire: LMB or 'F'");
-    text.setCharacterSize(7);
-    text.setPosition({ 30,30 });
+    float zoom = 0.5f; // 0.5 = zoom in (2x bigger visuals)
+    gameView.setSize({ 600.f * zoom, 600.f * zoom });
 
+
+   
+    ui.AddText(
+        "Aim reticule with the mouse\nMove: WASD\nFire: LMB",
+        11,
+        { 10.f, 10.f }
+    );
             
     
     while (window.isOpen())
-    {
+    {  
         
         sf::Vector2f clampedMouse = player.GetClampedAim(window, maxAimDistance);
-        player.targetSprite.setPosition(clampedMouse);
+        player.reticuleSprite.setPosition(clampedMouse);
         sf::Vector2f dir = input.GetMovement();
         float const delta_time = clock.restart().asSeconds();
         sf::Vector2f start = player.playerSprite.getPosition();
-        sf::Vector2f aimDir = NormalizeVector(clampedMouse - start);
+        sf::Vector2f aimDir = Math::NormalizeVector(clampedMouse - start);
         
-        bulletSystem.Update(delta_time);
-        player.Update(dir, aimDir, delta_time);
+        bulletSystem.Update(delta_time, enemy);
+        player.Update(dir, aimDir, delta_time, gameView, enemy);
+        enemy.Update(delta_time);
 
+      
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
 
-            if (event->is<sf::Event::Resized>())
+            if (const auto* resized = event->getIf<sf::Event::Resized>())
             {
-                auto size = event->getIf<sf::Event::Resized>()->size;
+                float windowRatio =
+                    static_cast<float>(resized->size.x) /
+                    static_cast<float>(resized->size.y);
 
-                sf::View view(sf::FloatRect({ 0.f, 0.f }, { 100.f, 100.f }));
+                float viewRatio = WORLD_W / WORLD_H;
 
-                float windowAspect = float(size.x) / float(size.y);
-                float worldAspect = 1.f;
+                float sizeX = 1.f;
+                float sizeY = 1.f;
 
-                if (windowAspect > worldAspect)
-                    view.setSize({ 500.f * windowAspect, 500.f });
+                float posX = 0.f;
+                float posY = 0.f;
+
+                if (windowRatio > viewRatio)
+                {
+                    sizeX = viewRatio / windowRatio;
+                    posX = (1.f - sizeX) * 0.5f;
+                }
                 else
-                    view.setSize({ 500.f, 500.f / windowAspect });
+                {
+                    sizeY = windowRatio / viewRatio;
+                    posY = (1.f - sizeY) * 0.5f;
+                }
 
-                view.setCenter({ 150.f, 150.f });
-                window.setView(view);
-            
-            
-            
+                gameView.setViewport(
+                    sf::FloatRect(
+                        { posX, posY },
+                        { sizeX, sizeY }
+                    )
+                );
             }
         }
-       
-
-
-        bulletSystem.Update(delta_time);
 
    
-        static float fireTimer = 0.f;
-
         fireTimer += delta_time;
 
         bool fireHeld = input.FirePressed();
@@ -133,17 +135,20 @@ int main()
             s->stop();
             s->play();
         }
-
-
+        
         
         window.clear();
         
-        window.draw(player.playerSprite);
-        window.draw(player.targetSprite);
-        window.draw(text);
+        window.setView(gameView);
+       
+        enemy.Draw(window);
+        player.Draw(window);
         bulletSystem.Draw(window);
+        window.setView(window.getDefaultView());
+        
+        ui.Draw(window);
+       
         window.display();
-        window.setView(window.getView());
         window.setMouseCursorVisible(false);
     }
 }

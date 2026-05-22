@@ -14,6 +14,5 @@ sf::Vector2f Input::GetMovement()
 
 bool Input::FirePressed()
 {
-    return sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F) ||
-        sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+    return sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 }
