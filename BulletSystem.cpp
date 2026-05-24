@@ -1,5 +1,23 @@
 #include "BulletSystem.h"
+#include "Math.h"
+#include <algorithm>
 
+bool BulletSystem::Shoot(sf::Vector2f start, sf::Vector2f dir)
+{
+    if (fireTimer < fireCooldown)
+        return false;
+
+    fireTimer = 0.f;
+
+    Bullet b;
+    b.shape.setSize({ 2.f, 2.f });
+    b.shape.setPosition(start);
+    b.direction = dir;
+
+    bullets.push_back(b);
+
+    return true;
+}
 
 void BulletSystem::Update(float delta_time, Enemy& enemy)
 {
@@ -15,6 +33,10 @@ void BulletSystem::Update(float delta_time, Enemy& enemy)
             enemy.enemyBox.getGlobalBounds()))
         {
             enemy.hitSound1.play();
+
+            enemy.isHit = true;
+            enemy.enemy_hit_timer = 0.f;
+
             b.dead = true;
         }
     }
@@ -28,22 +50,6 @@ void BulletSystem::Update(float delta_time, Enemy& enemy)
         bullets.end()
     );
 }
-
-void BulletSystem::Shoot(sf::Vector2f start, sf::Vector2f dir)
-{
-    if (fireTimer < fireCooldown)
-        return;
-
-    fireTimer = 0.f;
-
-    Bullet b; 
-    b.shape.setSize({ 2.f, 2.f });
-    b.shape.setPosition(start);
-    b.direction = dir;
-
-    bullets.push_back(b);
-}
-
 
 void BulletSystem::Draw(sf::RenderWindow& window)
 {

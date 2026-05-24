@@ -3,8 +3,9 @@
 
 Enemy::Enemy()
     : 
-    enemySprite(enemyTexture),
-    hitSound1(hitBuffer1)
+    enemySprite(idleTexture),
+    hitSound1(hitBuffer1),
+    bubbleSprite(stopTexture)
 {
 
 }
@@ -13,7 +14,12 @@ Enemy::Enemy()
 void Enemy::Load()
 {
 
-    if (!enemyTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Idle.png"))
+    if (!idleTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Idle.png"))
+    {
+        std::cout << "Failed to load Enemy_Idle.png\n";
+    }
+
+    if (!hitTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Hit.png"))
     {
         std::cout << "Failed to load Enemy_Idle.png\n";
     }
@@ -38,11 +44,7 @@ void Enemy::Initialize()
         enemyBox.setOutlineThickness(1);
         enemyBox.setSize(sf::Vector2f(enemyBoxSize.x, enemyBoxSize.y));
         enemyBox.setOrigin({ 38,40 });
- 
-   
 
-
-    
     
     sf::IntRect frame_1({ 0, 0 }, { 64, 64 });
     sf::IntRect frame_2({ 64, 0 }, { 64, 64 });
@@ -57,10 +59,11 @@ void Enemy::Initialize()
     enemySprite.setOrigin({ 60.f, 60.f });
 
     Idle = { frame_1, frame_2, frame_3, frame_4 };
-   
+    Hit = { frame_1, frame_2, frame_3, frame_4 };
+
     enemySprite.setPosition({ 300.f, 300.f });
 
-    hitSound1.setVolume(20.f);
+    hitSound1.setVolume(10.f);
 
 }
 
@@ -68,20 +71,52 @@ void Enemy::Initialize()
 
 void Enemy::Update(float delta_time)
 {
-
-    enemy_anim_timer += delta_time;
-
-    if (enemy_anim_timer >= enemy_anim_speed)
+    if (isHit)
     {
-        enemy_anim_timer = 0.f;
-        id_idx = (id_idx + 1) % Idle.size();
+        enemy_hit_timer += delta_time;
+
+        // animate frames
+        enemy_state_timer += delta_time;
+
+        if (enemy_state_timer >= enemy_hit_speed)
+        {
+            enemy_state_timer = 0.f;
+
+            ht_idx++;
+
+            if (ht_idx >= Hit.size())
+                ht_idx = Hit.size() - 1; // or loop if you want looping hit anim
+        }
+
+        enemySprite.setTexture(hitTexture);
+        enemySprite.setTextureRect(Hit[ht_idx]);
+
+        // exit state AFTER fixed duration
+        if (enemy_hit_timer >= hit_duration)
+        {
+            isHit = false;
+            enemy_hit_timer = 0.f;
+            enemy_state_timer = 0.f;
+            ht_idx = 0;
+        }
+    }
+    else
+    {
+        enemy_idle_timer += delta_time;
+
+        if (enemy_idle_timer >= enemy_idle_speed)
+        {
+            enemy_idle_timer = 0.f;
+            id_idx = (id_idx + 1) % Idle.size();
+        }
+
+        enemySprite.setTexture(idleTexture);
+        enemySprite.setTextureRect(Idle[id_idx]);
     }
 
-    enemySprite.setTextureRect((Idle[id_idx]));
-    
     enemyBox.setPosition(enemySprite.getPosition());
-
 }
+
 
 
 void Enemy::Draw(sf::RenderWindow& window)

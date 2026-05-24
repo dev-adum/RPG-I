@@ -115,9 +115,6 @@ public:
 	float fireSoundTimer = 0.f;
 	bool fireSoundPlaying = false;
 
-	float fireCooldown = 0.25f;
-	float fireTimer = 0.f;
-
 
 	unsigned int sw_idx = 0;
 	unsigned int s_idx = 0;

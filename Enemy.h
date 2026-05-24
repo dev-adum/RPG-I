@@ -14,8 +14,11 @@ public:
 	void Update(float delta_time);
 	void Draw(sf::RenderWindow& window);
 
-	sf::Texture enemyTexture;
+	sf::Texture idleTexture;
+	sf::Texture hitTexture;
+	sf::Texture stopTexture;
 	sf::Sprite enemySprite;
+	sf::Sprite bubbleSprite;
 	sf::RectangleShape enemyBox;
 
 	sf::Vector2i enemyBoxSize;
@@ -28,15 +31,49 @@ public:
 	sf::IntRect frame_4;
 
 
-	const std::vector<sf::IntRect>* anim = &Idle;
+	const std::vector<sf::IntRect>* idle = &Idle;
+	const std::vector<sf::IntRect>* hit = &Hit;
 
 	unsigned int id_idx = 0;
+	unsigned int ht_idx = 0;
+	unsigned int stop_idx = 0;
+
+	bool isHit = false;
+	bool isFiring = false;
 
 
 	std::vector<sf::IntRect> Idle;
+	std::vector<sf::IntRect> Hit;
+	std::vector<sf::IntRect> Stop;
+
+	bool showBubble = false;
+
 	
-	float enemy_anim_timer = 0.0f;
-	float const enemy_anim_speed = 1.f;
+	float bubble_delay = 2.f;
+
+	float bubble_stop_timer = 0.f;
+	float bubble_stop_speed = 0.2f;
+
+
+	float enemy_talk_speed = 0.2f;
+	float timeSinceLastShot = 0.f;
+	bool showStop = false;
+
+
+	float enemy_idle_timer = 0.0f;
+	float const enemy_idle_speed = 1.f;
+
+	float enemy_state_timer = 0.f;
+	float enemy_hit_timer = 0.f;
+	float enemy_hit_speed = 0.075f;
+	float hit_duration = 0.075f;
+
+	bool bubbleArmed = false;
+	float bubble_life_timer = 0.f;
+	float bubble_life_duration = 1.5f;
+	float bubble_frame_timer = 0.f;
+	float bubble_frame_speed = 0.2f;
+
 
 	unsigned int* currentIdx = &id_idx;
 

@@ -5,6 +5,7 @@
 class UIManager
 {
 public:
+    int fpsTextIndex = -1;
 
     sf::Font font;
     std::vector<sf::Text> texts;

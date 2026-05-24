@@ -64,8 +64,8 @@ void Player::Load()
 
 void Player::Initialize()
 {
-    sf::Vector2f playerPos = playerSprite.getPosition();
- 
+
+    
   
         playerBoxSize = sf::Vector2i({ 16,32 });
 
@@ -157,12 +157,15 @@ void Player::Initialize()
 
 sf::Vector2f Player::GetClampedAim(sf::RenderWindow& window, float maxDistance)
 {
+    sf::Vector2f pos = playerBox.getPosition();
+    
+    
     sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
     sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
 
-    sf::Vector2f playerPos = playerSprite.getPosition();
+   
 
-    sf::Vector2f offset = mouseWorld - playerPos;
+    sf::Vector2f offset = mouseWorld - pos;
 
     float length = std::sqrt(offset.x * offset.x + offset.y * offset.y);
 
@@ -171,8 +174,12 @@ sf::Vector2f Player::GetClampedAim(sf::RenderWindow& window, float maxDistance)
         offset /= length;
         offset *= maxDistance;
     }
+    playerBox.setPosition(pos);
+    playerSprite.setPosition(pos);
 
-    return playerPos + offset;
+    return pos + offset;
+
+
 }
 
 
@@ -182,12 +189,8 @@ sf::Vector2f Player::GetClampedAim(sf::RenderWindow& window, float maxDistance)
 
 void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy)
 {
-    sf::Vector2f playerPos = playerSprite.getPosition();
-
-
-
-
-
+    sf::Vector2f pos = playerBox.getPosition();
+    
     isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
     bool isMoving = (dir.x != 0.f || dir.y != 0.f);
@@ -382,36 +385,7 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, con
     // shift it DOWN inside the 64x64 frame
     float offsetY = 10.f / 2.f - bodyH / 2.f;
 
-    float bodyLeft = playerPos.x - bodyW / 2.f;
-    float bodyTop = playerPos.y + offsetY - bodyH / 2.f;
 
-
-
-    // left
-    if (bodyLeft < minX)
-        playerPos.x += (minX - bodyLeft);
-
-    // right
-    if (bodyLeft + bodyW > maxX)
-        playerPos.x -= (bodyLeft + bodyW - maxX);
-
-    // top
-    if (bodyTop < minY)
-        playerPos.y += (minY - bodyTop);
-
-    // bottom
-    if (bodyTop + bodyH > maxY)
-        playerPos.y -= (bodyTop + bodyH - maxY);
-
-
-
-
-
-
-
-
-
-    sf::Vector2f currentPos = playerSprite.getPosition();
     sf::Vector2f move = dir * moveSpeed * delta_time;
 
     // move hitbox first
@@ -426,10 +400,28 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, con
         playerBox.move(-move);
     }
 
-    // sync visuals AFTER physics
-    sf::Vector2f pos = playerBox.getPosition();
+    pos = playerBox.getPosition();
+
+    float bodyLeft = pos.x - bodyW / 2.f;
+    float bodyTop = pos.y + offsetY - bodyH / 2.f;
+
+    // clamp X
+    if (bodyLeft < minX)
+        pos.x += (minX - bodyLeft);
+
+    if (bodyLeft + bodyW > maxX)
+        pos.x -= (bodyLeft + bodyW - maxX);
+
+    // clamp Y
+    if (bodyTop < minY)
+        pos.y += (minY - bodyTop);
+
+    if (bodyTop + bodyH > maxY)
+        pos.y -= (bodyTop + bodyH - maxY);
+
+    // APPLY RESULT (this is the missing piece)
+    playerBox.setPosition(pos);
     playerSprite.setPosition(pos);
-   
 }
 
 void Player::Draw(sf::RenderWindow& window)
