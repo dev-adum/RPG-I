@@ -45,7 +45,13 @@ void Enemy::Initialize()
         enemyBox.setSize(sf::Vector2f(enemyBoxSize.x, enemyBoxSize.y));
         enemyBox.setOrigin({ 38,40 });
 
-    
+        enemyHealthBarBack.setSize({ 40.f, 5.f });
+        enemyHealthBarBack.setFillColor(sf::Color::Red);
+
+        enemyHealthBarFront.setSize({ 40.f, 5.f });
+        enemyHealthBarFront.setFillColor(sf::Color::Green);
+
+
     sf::IntRect frame_1({ 0, 0 }, { 64, 64 });
     sf::IntRect frame_2({ 64, 0 }, { 64, 64 });
     sf::IntRect frame_3({ 128, 0 }, { 64, 64 });
@@ -71,6 +77,30 @@ void Enemy::Initialize()
 
 void Enemy::Update(float delta_time)
 {
+    
+    enemyHealthBarBack.setPosition({
+        enemySprite.getPosition().x - 20.f,
+        enemySprite.getPosition().y - 50.f
+        });
+
+    enemyHealthBarFront.setPosition({
+        enemySprite.getPosition().x - 20.f,
+        enemySprite.getPosition().y - 50.f
+        });
+
+
+
+
+
+    float healthPercent =
+        static_cast<float>(health) / maxHealth;
+
+    enemyHealthBarFront.setSize(
+        {
+            40.f * healthPercent,
+            5.f
+        });
+
     if (isHit)
     {
         enemy_hit_timer += delta_time;
@@ -117,7 +147,22 @@ void Enemy::Update(float delta_time)
     enemyBox.setPosition(enemySprite.getPosition());
 }
 
+void Enemy::TakeDamage(int damage)
+{
+    health -= damage;
 
+    isHit = true;
+    enemy_hit_timer = 0.f;
+
+
+    if (health <= 0)
+    {
+        health = 0;
+        dead = true;
+
+        std::cout << "Enemy Dead\n";
+    }
+}
 
 void Enemy::Draw(sf::RenderWindow& window)
 {

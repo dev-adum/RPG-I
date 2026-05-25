@@ -32,10 +32,7 @@ void BulletSystem::Update(float delta_time, Enemy& enemy)
             b.shape.getGlobalBounds(),
             enemy.enemyBox.getGlobalBounds()))
         {
-            enemy.hitSound1.play();
-
-            enemy.isHit = true;
-            enemy.enemy_hit_timer = 0.f;
+            enemy.TakeDamage(10);
 
             b.dead = true;
         }

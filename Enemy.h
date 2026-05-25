@@ -13,6 +13,8 @@ public:
 	void Initialize();
 	void Update(float delta_time);
 	void Draw(sf::RenderWindow& window);
+	void TakeDamage(int damage);
+
 
 	sf::Texture idleTexture;
 	sf::Texture hitTexture;
@@ -20,6 +22,9 @@ public:
 	sf::Sprite enemySprite;
 	sf::Sprite bubbleSprite;
 	sf::RectangleShape enemyBox;
+
+	sf::RectangleShape enemyHealthBarBack;
+	sf::RectangleShape enemyHealthBarFront;
 
 	sf::Vector2i enemyBoxSize;
 	sf::SoundBuffer hitBuffer1;
@@ -33,6 +38,12 @@ public:
 
 	const std::vector<sf::IntRect>* idle = &Idle;
 	const std::vector<sf::IntRect>* hit = &Hit;
+
+	int health = 100;
+	int maxHealth = 100;
+	bool dead = false;
+
+
 
 	unsigned int id_idx = 0;
 	unsigned int ht_idx = 0;
