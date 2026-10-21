@@ -1,23 +1,16 @@
 #include "Player.h"
 
-
 Player::Player()
     : playerSprite(playerTexture),
     reticuleSprite(reticuleTexture),
     walkSound(walkBuffer),
-    VoidTrack(),
     fireSound1(fireBuffer1),
     fireSound2(fireBuffer2)
-   
 {
-
 }
- 
 
 void Player::Load()
 {
-    
-
     if (!playerTexture.loadFromFile("Assets/Player/Textures/Player_Walk.png"))
     {
         std::cout << "Failed to load Player_Walk.png\n";
@@ -45,211 +38,140 @@ void Player::Load()
     {
         std::cout << "Failed to load Bang_2.wav\n";
     }
-
-   
-
-
-    if (!VoidTrack.openFromFile("Assets/Music/Void/VoidTrack.wav"))
-    {
-        std::cout << "Failed to load VoidTrack.wav\n";
-    }
-
-    VoidTrack.setLooping(true);
-    VoidTrack.play();
-
-
-
 }
-
 
 void Player::Initialize()
 {
+    fireSound1.setVolume(10.f);
+    fireSound2.setVolume(10.f);
 
-    
-  
-        playerBoxSize = sf::Vector2i({ 16,32 });
+    playerBoxSize = sf::Vector2i({ 10,25 });
 
-        playerBox.setFillColor(sf::Color::Transparent);
-        playerBox.setOutlineColor(sf::Color::Transparent);
-        playerBox.setOutlineThickness(1);
-        playerBox.setSize(sf::Vector2f(playerBoxSize.x, playerBoxSize.y));
-        playerBox.setOrigin({ 9,10 });
-   
+    playerBox.setFillColor(sf::Color::Transparent);
+    playerBox.setOutlineColor(sf::Color::Transparent);
+    playerBox.setOutlineThickness(1);
+    playerBox.setSize(sf::Vector2f(playerBoxSize.x, playerBoxSize.y));
+    playerBox.setOrigin({ 9,10 });
 
-
-
-    sf::IntRect frame_1({ 0, 0 }, { 64, 64 });
-   sf::IntRect frame_2({ 64, 0 }, { 64, 64 });
-   sf::IntRect frame_3({ 128, 0 }, { 64, 64 });
-   sf::IntRect frame_4({ 192, 0 }, { 64, 64 });
-
-   sf::IntRect frame_5({ 256, 0 }, { 64, 64 });
-   sf::IntRect frame_6({ 320, 0 }, { 64, 64 });
-   sf::IntRect frame_7({ 384, 0 }, { 64, 64 });
-   sf::IntRect frame_8({ 448, 0 }, { 64, 64 });
-
-   sf::IntRect frame_9({ 0, 64 }, { 64, 64 });
-   sf::IntRect frame_10({ 64, 64 }, { 64, 64 });
-   sf::IntRect frame_11({ 128, 64 }, { 64, 64 });
-   sf::IntRect frame_12({ 192, 64 }, { 64, 64 });
-
-   sf::IntRect frame_13({ 256, 64 }, { 64, 64 });
-   sf::IntRect frame_14({ 320, 64 }, { 64, 64 });
-   sf::IntRect frame_15({ 384, 64 }, { 64, 64 });
-   sf::IntRect frame_16({ 448, 64 }, { 64, 64 });
-    
-   sf::IntRect frame_17({ 0, 128 }, { 64, 64 });
-   sf::IntRect frame_18({ 64, 128 }, { 64, 64 });
-   sf::IntRect frame_19({ 128, 128 }, { 64, 64 });
-   sf::IntRect frame_20({ 192, 128 }, { 64, 64 });
-
-   sf::IntRect frame_21({ 256, 128 }, { 64, 64 });
-   sf::IntRect frame_22({ 320, 128 }, { 64, 64 });
-   sf::IntRect frame_23({ 384, 128 }, { 64, 64 });
-   sf::IntRect frame_24({ 448, 128 }, { 64, 64 });
-
-   sf::IntRect frame_25({ 0, 192 }, { 64, 64 });
-   sf::IntRect frame_26({ 64, 192 }, { 64, 64 });
-   sf::IntRect frame_27({ 128, 192 }, { 64, 64 });
-   sf::IntRect frame_28({ 192, 192 }, { 64, 64 });
-
-   sf::IntRect frame_29({ 256, 192 }, { 64, 64 });
-   sf::IntRect frame_30({ 320, 192 }, { 64, 64 });
-   sf::IntRect frame_31({ 384, 192 }, { 64, 64 });
-   sf::IntRect frame_32({ 448, 192 }, { 64, 64 });
-
-    
-
-    
     playerSprite.setOrigin({ 32.f, 32.f });
     reticuleSprite.setOrigin({ 32.f, 32.f });
-    
-    
 
-	SouthWest = { frame_1, frame_2 };
-	South = { frame_3, frame_4 };
-	SouthEast = { frame_5, frame_6 };
-	East = { frame_7, frame_8 };
-	NorthEast = { frame_9, frame_10 };
-	North = { frame_11, frame_12 };
-	NorthWest = { frame_13, frame_14 };
-	West = { frame_15, frame_16 };
+    // --- AUTOMATED SPRITESHEET SLICING (Walk Animations) ---
+    // Row 0 (Y = 0)
+    animManager.AddRow("Walk_East", 384, 0, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_SouthEast", 256, 0, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_South", 128, 0, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_SouthWest", 0, 0, 64, 64, 2, 0.1f);
 
-    SouthWestFire = { frame_17, frame_18 };
-    SouthFire = { frame_19, frame_20 };
-    SouthEastFire = { frame_21, frame_22 };
-    EastFire = { frame_23, frame_24 };
-    NorthEastFire = { frame_25, frame_26 };
-    NorthFire = { frame_27, frame_28 };
-    NorthWestFire = { frame_29, frame_30 };
-    WestFire = { frame_31, frame_32 };
+    // Row 1 (Y = 64)
+    animManager.AddRow("Walk_West", 384, 64, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_NorthWest", 256, 64, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_North", 128, 64, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_NorthEast", 0, 64, 64, 64, 2, 0.1f);
 
+    // --- AUTOMATED SPRITESHEET SLICING (Fire Animations) ---
+    // Row 2 (Y = 128)
+    animManager.AddRow("Fire_East", 384, 128, 64, 64, 2, 0.05f);
+    animManager.AddRow("Fire_SouthEast", 256, 128, 64, 64, 2, 0.05f);
+    animManager.AddRow("Fire_South", 128, 128, 64, 64, 2, 0.05f);
+    animManager.AddRow("Fire_SouthWest", 0, 128, 64, 64, 2, 0.05f);
 
+    // Row 3 (Y = 192)
+    animManager.AddRow("Fire_West", 384, 192, 64, 64, 2, 0.05f);
+    animManager.AddRow("Fire_NorthWest", 256, 192, 64, 64, 2, 0.05f);
+    animManager.AddRow("Fire_North", 128, 192, 64, 64, 2, 0.05f);
+    animManager.AddRow("Fire_NorthEast", 0, 192, 64, 64, 2, 0.05f);
 
-
-	Reticule = { frame_1, frame_2 };
-
-
-
-
+    // Reticule frames (using first row frame setup just for reference)
+    sf::IntRect r1({ 0, 0 }, { 64, 64 });
+    sf::IntRect r2({ 64, 0 }, { 64, 64 });
+    Reticule = { r1, r2 };
 }
 
-
-sf::Vector2f Player::GetClampedAim(sf::RenderWindow& window, float maxDistance)
+sf::Vector2f Player::GetSmoothedAim(sf::RenderWindow& window, const sf::View& view, float delta_time)
 {
     sf::Vector2f pos = playerBox.getPosition();
-    
-    
-    sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
-    sf::Vector2f mouseWorld = window.mapPixelToCoords(mousePixel);
+    sf::Vector2i currentMouse = sf::Mouse::getPosition(window);
 
-   
-
-    sf::Vector2f offset = mouseWorld - pos;
-
-    float length = std::sqrt(offset.x * offset.x + offset.y * offset.y);
-
-    if (length > maxDistance && length > 0.f)
+    if (firstMouseCheck)
     {
-        offset /= length;
-        offset *= maxDistance;
+        lastMousePos = currentMouse;
+        firstMouseCheck = false;
     }
-    playerBox.setPosition(pos);
-    playerSprite.setPosition(pos);
 
-    return pos + offset;
+    sf::Vector2i mouseDelta = currentMouse - lastMousePos;
+    lastMousePos = currentMouse;
 
+    sf::Vector2f worldDelta(
+        static_cast<float>(mouseDelta.x) * (view.getSize().x / static_cast<float>(window.getSize().x)),
+        static_cast<float>(mouseDelta.y) * (view.getSize().y / static_cast<float>(window.getSize().y))
+    );
 
+    aimOffset += worldDelta;
+
+    float length = std::sqrt(aimOffset.x * aimOffset.x + aimOffset.y * aimOffset.y);
+    if (length > maxAimDistance)
+    {
+        aimOffset *= (maxAimDistance / length);
+    }
+    else if (length == 0.f && aimOffset.x == 0.f && aimOffset.y == 0.f)
+    {
+        aimOffset = { maxAimDistance, 0.f };
+    }
+
+    if (!isReticuleInitialized)
+    {
+        smoothedAimOffset = aimOffset;
+        isReticuleInitialized = true;
+    }
+
+    float aimSmoothSpeed = 5.f;
+    smoothedAimOffset.x += (aimOffset.x - smoothedAimOffset.x) * aimSmoothSpeed * delta_time;
+    smoothedAimOffset.y += (aimOffset.y - smoothedAimOffset.y) * aimSmoothSpeed * delta_time;
+
+    return pos + smoothedAimOffset;
 }
 
-
-
-
-
-
-void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy)
+void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
+    const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData)
 {
     sf::Vector2f pos = playerBox.getPosition();
-    
     isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-
     bool isMoving = (dir.x != 0.f || dir.y != 0.f);
 
+    // --- CLEAN ANIMATION MAPPING VIA MATH ---
+    std::string directionName = Math::Get8WayDirection(aimDir);
+    std::string animPrefix = isFiring ? "Fire_" : "Walk_";
+    std::string fullAnimName = animPrefix + directionName;
 
+    animManager.Play(fullAnimName);
 
-
-    // aimDir is already "mouse - player", so we classify direction directly
-    float angle = std::atan2(aimDir.y, aimDir.x) * 180.f / 3.14159f;
-
-    // normalize angle to 0–360
-    if (angle < 0.f)
-        angle += 360.f;
-
-    // 8-direction slicing (each 45 degrees)
-    if (angle >= 337.5f || angle < 22.5f)
+    if (isMoving || isFiring)
     {
-        anim = &East;
-        currentIdx = &e_idx;
-    }
-    else if (angle < 67.5f)
-    {
-        anim = &SouthEast;
-
-        currentIdx = &se_idx;
-    }
-    else if (angle < 112.5f)
-    {
-        anim = &South;
-        currentIdx = &s_idx;
-    }
-    else if (angle < 157.5f)
-    {
-        anim = &SouthWest;
-        currentIdx = &sw_idx;
-    }
-    else if (angle < 202.5f)
-    {
-        anim = &West;
-        currentIdx = &w_idx;
-    }
-    else if (angle < 247.5f)
-    {
-        anim = &NorthWest;
-        currentIdx = &nw_idx;
-    }
-    else if (angle < 292.5f)
-    {
-        anim = &North;
-        currentIdx = &n_idx;
+        animManager.Update(delta_time, playerSprite);
     }
     else
     {
-        anim = &NorthEast;
-        currentIdx = &ne_idx;
+        animManager.frameIndex = 0;
+        animManager.timer = 0.f;
+        // Keep the first frame of the current direction active when stationary
+        if (animManager.animations.find(fullAnimName) != animManager.animations.end() &&
+            !animManager.animations[fullAnimName].frames.empty())
+        {
+            playerSprite.setTextureRect(animManager.animations[fullAnimName].frames[0]);
+        }
     }
 
+    // --- RETICULE ANIMATION ---
+    reticule_anim_timer += delta_time;
+    if (reticule_anim_timer >= reticule_anim_speed)
+    {
+        reticule_anim_timer = 0.f;
+        targ_idx = (targ_idx + 1) % Reticule.size();
+    }
+    reticuleSprite.setTextureRect(Reticule[targ_idx]);
 
-
+    // --- AUDIO HANDLING ---
     if (isMoving)
     {
         if (walkSound.getStatus() != sf::Sound::Status::Playing)
@@ -263,111 +185,11 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, con
         {
             walkSound.setVolume(std::max(0.f, v - 850.f * delta_time));
         }
-
-
         else
         {
             walkSound.stop();
         }
     }
-
-    if (anim == &SouthWest)
-        fire_anim = &SouthWestFire;
-    else if (anim == &South)
-        fire_anim = &SouthFire;
-    else if (anim == &SouthEast)
-        fire_anim = &SouthEastFire;
-    else if (anim == &East)
-        fire_anim = &EastFire;
-    else if (anim == &NorthEast)
-        fire_anim = &NorthEastFire;
-    else if (anim == &North)
-        fire_anim = &NorthFire;
-    else if (anim == &NorthWest)
-        fire_anim = &NorthWestFire;
-    else if (anim == &West)
-        fire_anim = &WestFire;
-
-
-
-
-
-
-
-
-    player_anim_timer += delta_time;
-
-    if (isMoving)
-    {
-
-        if (player_anim_timer >= player_anim_speed)
-        {
-            player_anim_timer = 0.f;
-            *currentIdx = (*currentIdx + 1) % anim->size();
-        }
-
-    }
-    else
-    {
-        *currentIdx = 0;
-        player_anim_timer = 0.f;
-    }
-
-    reticule_anim_timer += delta_time;
-
-    if (reticule_anim_timer >= reticule_anim_speed)
-    {
-        reticule_anim_timer = 0.f;
-        targ_idx = (targ_idx + 1) % Reticule.size();
-    }
-
-    reticuleSprite.setTextureRect((Reticule[targ_idx]));
-
-    const std::vector<sf::IntRect>* finalAnim = anim;
-    unsigned int* finalIdx = currentIdx;
-
-    if (isFiring && fire_anim != nullptr && fire_anim->size() >= 2)
-    {
-        finalAnim = fire_anim;
-
-        if (anim == &SouthWest) finalIdx = &sw_fire_idx;
-        else if (anim == &South) finalIdx = &s_fire_idx;
-        else if (anim == &SouthEast) finalIdx = &se_fire_idx;
-        else if (anim == &East) finalIdx = &e_fire_idx;
-        else if (anim == &NorthEast) finalIdx = &ne_fire_idx;
-        else if (anim == &North) finalIdx = &n_fire_idx;
-        else if (anim == &NorthWest) finalIdx = &nw_fire_idx;
-        else if (anim == &West) finalIdx = &w_fire_idx;
-    }
-
-    if (isFiring && finalAnim && finalAnim->size() >= 2)
-    {
-        fire_anim_timer += delta_time;
-
-        if (fire_anim_timer >= fire_anim_speed)
-        {
-            fire_anim_timer = 0.f;
-
-            // advance fire animation
-            (*finalIdx)++;
-
-            // clamp / loop only over fire frames
-            if (*finalIdx >= finalAnim->size())
-                *finalIdx = 0;
-        }
-    }
-    else
-    {
-        fire_anim_timer = 0.f;
-
-        // IMPORTANT: only reset fire indices (not movement indices)
-        sw_fire_idx = s_fire_idx = se_fire_idx =
-            e_fire_idx = ne_fire_idx = n_fire_idx =
-            nw_fire_idx = w_fire_idx = 0;
-    }
-
-    if (finalAnim && *finalIdx < finalAnim->size())
-        playerSprite.setTextureRect((*finalAnim)[*finalIdx]);
 
     sf::Vector2f center = view.getCenter();
     sf::Vector2f size = view.getSize();
@@ -377,27 +199,64 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, con
     float minY = center.y - size.y / 2.f;
     float maxY = center.y + size.y / 2.f;
 
-
-    // define body (feet area)
     float bodyW = 16.f;
     float bodyH = 16.f;
-
-    // shift it DOWN inside the 64x64 frame
     float offsetY = 10.f / 2.f - bodyH / 2.f;
-
 
     sf::Vector2f move = dir * moveSpeed * delta_time;
 
-    // move hitbox first
+    // Move hitbox first
     playerBox.move(move);
 
-    // collision (box vs box)
+    // 1. Enemy collision
     if (Math::DetectCollision(
         playerBox.getGlobalBounds(),
         enemy.enemyBox.getGlobalBounds()))
     {
-        // undo move
         playerBox.move(-move);
+    }
+
+    // 2. Tile collision check
+    if (mapData.GetTileSizeX() > 0 && mapData.GetTileSizeY() > 0)
+    {
+        sf::FloatRect bounds = playerBox.getGlobalBounds();
+
+        sf::Vector2f corners[4] = {
+            { bounds.position.x, bounds.position.y },
+            { bounds.position.x + bounds.size.x, bounds.position.y },
+            { bounds.position.x, bounds.position.y + bounds.size.y },
+            { bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y }
+        };
+
+        const auto& layout = mapData.GetData();
+        bool tileBlocked = false;
+
+        for (const auto& corner : corners)
+        {
+            int gridX = static_cast<int>(corner.x / mapData.GetTileSizeX());
+            int gridY = static_cast<int>(corner.y / mapData.GetTileSizeY());
+
+            if (gridY >= 0 && gridY < static_cast<int>(layout.size()) &&
+                gridX >= 0 && gridX < static_cast<int>(layout[gridY].size()))
+            {
+                int tileId = layout[gridY][gridX];
+                if (mapData.IsTileSolid(tileId))
+                {
+                    tileBlocked = true;
+                    break;
+                }
+            }
+            else
+            {
+                tileBlocked = true;
+                break;
+            }
+        }
+
+        if (tileBlocked)
+        {
+            playerBox.move(-move);
+        }
     }
 
     pos = playerBox.getPosition();
@@ -405,21 +264,33 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, con
     float bodyLeft = pos.x - bodyW / 2.f;
     float bodyTop = pos.y + offsetY - bodyH / 2.f;
 
-    // clamp X
     if (bodyLeft < minX)
         pos.x += (minX - bodyLeft);
 
     if (bodyLeft + bodyW > maxX)
         pos.x -= (bodyLeft + bodyW - maxX);
 
-    // clamp Y
     if (bodyTop < minY)
         pos.y += (minY - bodyTop);
 
     if (bodyTop + bodyH > maxY)
         pos.y -= (bodyTop + bodyH - maxY);
 
-    // APPLY RESULT (this is the missing piece)
+    if (isFiring)
+    {
+        bool fired = bulletSystem.Shoot(playerBox.getPosition(), aimDir);
+
+        if (fired)
+        {
+            sf::Sound* s = (rand() % 2 == 0)
+                ? &fireSound1
+                : &fireSound2;
+
+            s->setVolume(bulletVolume);
+            s->play();
+        }
+    }
+
     playerBox.setPosition(pos);
     playerSprite.setPosition(pos);
 }
@@ -429,5 +300,4 @@ void Player::Draw(sf::RenderWindow& window)
     window.draw(playerSprite);
     window.draw(reticuleSprite);
     window.draw(playerBox);
-
 }

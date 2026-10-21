@@ -13,13 +13,13 @@ bool BulletSystem::Shoot(sf::Vector2f start, sf::Vector2f dir)
     b.shape.setSize({ 2.f, 2.f });
     b.shape.setPosition(start);
     b.direction = dir;
-
+    
     bullets.push_back(b);
 
     return true;
 }
 
-void BulletSystem::Update(float delta_time, Enemy& enemy)
+void BulletSystem::Update(float delta_time, Enemy& enemy, Input& input)
 {
     fireTimer += delta_time;
 
@@ -46,6 +46,10 @@ void BulletSystem::Update(float delta_time, Enemy& enemy)
             }),
         bullets.end()
     );
+
+   
+
+
 }
 
 void BulletSystem::Draw(sf::RenderWindow& window)
@@ -53,3 +57,4 @@ void BulletSystem::Draw(sf::RenderWindow& window)
     for (auto& b : bullets)
         window.draw(b.shape);
 }
+

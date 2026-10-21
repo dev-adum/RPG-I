@@ -1,4 +1,6 @@
 #include "Math.h"
+#include <cmath>
+#include <string>
 
 sf::Vector2f Math::NormalizeVector(sf::Vector2f vector)
 {
@@ -6,12 +8,18 @@ sf::Vector2f Math::NormalizeVector(sf::Vector2f vector)
 
     sf::Vector2f normalizedVector;
 
-    normalizedVector.x = vector.x / m;
-    normalizedVector.y = vector.y / m;
+    if (m != 0.f)
+    {
+        normalizedVector.x = vector.x / m;
+        normalizedVector.y = vector.y / m;
+    }
+    else
+    {
+        normalizedVector = { 0.f, 0.f };
+    }
 
     return normalizedVector;
 }
-
 
 bool Math::DetectCollision(sf::FloatRect rect1, sf::FloatRect rect2)
 {
@@ -22,4 +30,21 @@ bool Math::DetectCollision(sf::FloatRect rect1, sf::FloatRect rect2)
         return true;
 
     return false;
+}
+
+std::string Math::Get8WayDirection(sf::Vector2f dir)
+{
+    if (dir.x == 0.f && dir.y == 0.f) return "South"; // Default fallback
+
+    float angle = std::atan2(dir.y, dir.x) * 180.f / 3.14159f;
+    if (angle < 0.f) angle += 360.f;
+
+    int index = static_cast<int>(std::floor((angle + 22.5f) / 45.f)) % 8;
+
+    const std::string directions[8] = {
+        "East", "SouthEast", "South", "SouthWest",
+        "West", "NorthWest", "North", "NorthEast"
+    };
+
+    return directions[index];
 }

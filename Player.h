@@ -4,154 +4,64 @@
 #include <iostream>
 #include "Math.h"
 #include "Enemy.h"
+#include "BulletSystem.h"
+#include "MapData.h"
+#include "Animation.h" 
 
 class Enemy;
 
 class Player
 {
 public:
+    Player();
 
-	Player();
+    void Load();
+    void Initialize();
+    void Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData);
+    void Draw(sf::RenderWindow& window);
 
-	void Load();
-	void Initialize();
-	void Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy);
-	void Draw(sf::RenderWindow& window);
+    // Clean position getter using your authoritative hitbox
+    sf::Vector2f getPosition() const {
+        return playerBox.getPosition();
+    }
 
-	sf::RectangleShape playerBox;
+    sf::Vector2f GetSmoothedAim(sf::RenderWindow& window, const sf::View& view, float delta_time);
 
-	sf::Vector2i playerBoxSize;
+    sf::Vector2f smoothedAimOffset = { 0.f, 0.f };
+    bool isReticuleInitialized = false;
 
+    sf::Vector2f aimOffset = { 0.f, 0.f };
+    sf::Vector2i lastMousePos;
+    bool firstMouseCheck = true;
 
+    sf::RectangleShape playerBox;
+    sf::Vector2i playerBoxSize;
 
-	sf::Vector2f GetClampedAim(sf::RenderWindow& window, float maxDistance);
+    sf::Texture playerTexture;
+    sf::Sprite playerSprite;
 
-	sf::Texture playerTexture;
-	sf::Sprite playerSprite;
+    sf::Texture reticuleTexture;
+    sf::Sprite reticuleSprite;
 
-	sf::Vector2f playerPos;
+    sf::SoundBuffer walkBuffer;
+    sf::SoundBuffer fireBuffer1;
+    sf::SoundBuffer fireBuffer2;
 
-	sf::Texture reticuleTexture;
-	sf::Sprite reticuleSprite;
+    sf::Sound fireSound1;
+    sf::Sound fireSound2;
+    sf::Sound walkSound;
 
-	sf::SoundBuffer walkBuffer;
-	sf::SoundBuffer fireBuffer1;
-	sf::SoundBuffer fireBuffer2;
-	
-	sf::Sound fireSound1;
-	sf::Sound fireSound2;
-	
+    // --- ANIMATION MANAGER ---
+    AnimationManager animManager;
 
-	sf::Music VoidTrack;
-	sf::Sound walkSound;
+    std::vector<sf::IntRect> Reticule;
+    unsigned int targ_idx = 0;
+    float reticule_anim_timer = 0.0f;
+    float const reticule_anim_speed = 0.8f;
 
-	sf::IntRect frame_1;
-	sf::IntRect frame_2;
-	sf::IntRect frame_3;
-	sf::IntRect frame_4;
+    float maxAimDistance = 100.f;
+    float moveSpeed = 100.f;
 
-	sf::IntRect frame_5;
-	sf::IntRect frame_6;
-	sf::IntRect frame_7;
-	sf::IntRect frame_8;
-
-	sf::IntRect frame_9;
-	sf::IntRect frame_10;
-	sf::IntRect frame_11;
-	sf::IntRect frame_12;
-
-	sf::IntRect frame_13;
-	sf::IntRect frame_14;
-	sf::IntRect frame_15;
-	sf::IntRect frame_16;
-
-	sf::IntRect frame_17;
-	sf::IntRect frame_18;
-	sf::IntRect frame_19;
-	sf::IntRect frame_20;
-
-	sf::IntRect frame_21;
-	sf::IntRect frame_22;
-	sf::IntRect frame_23;
-	sf::IntRect frame_24;
-
-	sf::IntRect frame_25;
-	sf::IntRect frame_26;
-	sf::IntRect frame_27;
-	sf::IntRect frame_28;
-
-	sf::IntRect frame_29;
-	sf::IntRect frame_30;
-	sf::IntRect frame_31;
-	sf::IntRect frame_32;
-
-
-
-	std::vector<sf::IntRect> SouthWest;
-	std::vector<sf::IntRect> South;
-	std::vector<sf::IntRect> SouthEast;
-	std::vector<sf::IntRect> East;
-	std::vector<sf::IntRect> NorthEast;
-	std::vector<sf::IntRect> North;
-	std::vector<sf::IntRect> NorthWest;
-	std::vector<sf::IntRect> West;
-
-	std::vector<sf::IntRect> SouthWestFire;
-	std::vector<sf::IntRect> SouthFire;
-	std::vector<sf::IntRect> SouthEastFire;
-	std::vector<sf::IntRect> EastFire;
-	std::vector<sf::IntRect> NorthEastFire;
-	std::vector<sf::IntRect> NorthFire;
-	std::vector<sf::IntRect> NorthWestFire;
-	std::vector<sf::IntRect> WestFire;
-
-
-	std::vector<sf::IntRect> Reticule;
-	
-	const std::vector<sf::IntRect>* anim = &South;
-	const std::vector<sf::IntRect>* fire_anim = &SouthFire;
-
-	float fireCutoff = 0.08f; // 80ms burst
-	float fireSoundTimer = 0.f;
-	bool fireSoundPlaying = false;
-
-
-	unsigned int sw_idx = 0;
-	unsigned int s_idx = 0;
-	unsigned int se_idx = 0;
-	unsigned int e_idx = 0;
-	unsigned int ne_idx = 0;
-	unsigned int n_idx = 0;
-	unsigned int nw_idx = 0;
-	unsigned int w_idx = 0;
-
-	unsigned int sw_fire_idx = 0;
-	unsigned int s_fire_idx = 0;
-	unsigned int se_fire_idx = 0;
-	unsigned int e_fire_idx = 0;
-	unsigned int ne_fire_idx = 0;
-	unsigned int n_fire_idx = 0;
-	unsigned int nw_fire_idx = 0;
-	unsigned int w_fire_idx = 0;
-
-
-	float moveSpeed = 250.f;
-	
-
-
-	unsigned int targ_idx = 0;
-
-	float fire_anim_timer = 0.0f;
-	float const fire_anim_speed = 0.15f;
-	bool isFiring = false;
-
-	float player_anim_timer = 0.0f;
-	float const player_anim_speed = 0.15f;
-
-	float reticule_anim_timer = 0.0f;
-	float const reticule_anim_speed = 0.8f;
-	unsigned int* currentIdx = &s_idx;
-
-	float bulletVolume = 40.f;
-
+    bool isFiring = false;
+    float bulletVolume = 20.f;
 };

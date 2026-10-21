@@ -11,8 +11,3 @@ sf::Vector2f Input::GetMovement()
 
     return dir;
 }
-
-bool Input::FirePressed()
-{
-    return sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-}

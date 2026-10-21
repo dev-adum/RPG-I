@@ -1,10 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <string>
 
 class Math
 {
 public:
-	static sf::Vector2f NormalizeVector(sf::Vector2f vector);
-	static bool DetectCollision(sf::FloatRect rect1, sf::FloatRect rect2);
+    static sf::Vector2f NormalizeVector(sf::Vector2f vector);
+    static bool DetectCollision(sf::FloatRect rect1, sf::FloatRect rect2);
+    static std::string Get8WayDirection(sf::Vector2f dir); // <--- Add this declaration
 };
-

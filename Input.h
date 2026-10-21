@@ -5,7 +5,7 @@ class Input
 {
 public:
     sf::Vector2f GetMovement();
-    bool FirePressed();
+   
 
 };
 
