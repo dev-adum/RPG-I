@@ -8,9 +8,9 @@ Enemy::Enemy()
 
 void Enemy::Load()
 {
-    if (!idleTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Idle.png"))
+    if (!idleTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Walk.png"))
     {
-        std::cout << "Failed to load Enemy_Idle.png\n";
+        std::cout << "Failed to load Enemy_Walk.png\n";
     }
 
     if (!hitTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Hit.png"))
@@ -46,12 +46,24 @@ void Enemy::Initialize()
     hitSound1.setVolume(30.f);
 
     // --- SETUP ENEMY ANIMATIONS VIA ANIMATION MANAGER ---
-    // Assuming your enemy spritesheet has rows for Idle and Hit
-    animManager.AddRow("Idle_South", 0, 0, 64, 64, 4, 0.15f);
+    // Enemy_Walk.png is byte-identical in layout to Player_Walk.png,
+    // so the same slicing table applies.
+    // Row 0 (Y = 0)
+    animManager.AddRow("Walk_East", 384, 0, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_SouthEast", 256, 0, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_South", 128, 0, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_SouthWest", 0, 0, 64, 64, 2, 0.1f);
+
+    // Row 1 (Y = 64)
+    animManager.AddRow("Walk_West", 384, 64, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_NorthWest", 256, 64, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_North", 128, 64, 64, 64, 2, 0.1f);
+    animManager.AddRow("Walk_NorthEast", 0, 64, 64, 64, 2, 0.1f);
+
     animManager.AddRow("Hit_South", 0, 0, 64, 64, 4, 0.08f);
 }
 
-void Enemy::Update(float delta_time, sf::Vector2f playerPos)
+void Enemy::Update(float delta_time, sf::Vector2f playerPos, const MapData& mapData)
 {
     // --- 1. HEALTH BAR TRACKING ---
     sf::Vector2f currentPos = enemySprite.getPosition();
@@ -63,7 +75,7 @@ void Enemy::Update(float delta_time, sf::Vector2f playerPos)
     enemyHealthBarFront.setSize({ 30.f * healthPercent, 3.f });
 
     // --- 2. FINITE STATE MACHINE (FSM) AI ---
-    std::string animState = "Idle_South";
+    std::string animState = "Walk_South";
 
     if (isHit)
     {
@@ -85,18 +97,62 @@ void Enemy::Update(float delta_time, sf::Vector2f playerPos)
         // Check if player is within aggro range to Chase
         if (distance < aggroRange && distance > 5.f)
         {
-            // Normalize direction vector for movement
             sf::Vector2f normalizedDir = Math::NormalizeVector(dirToPlayer);
-            currentPos += normalizedDir * moveSpeed * delta_time;
-            enemySprite.setPosition(currentPos);
+            sf::Vector2f move = normalizedDir * moveSpeed * delta_time;
 
-            // Use our modular math helper to map direction to animation name!
-            std::string facingDir = Math::Get8WayDirection(dirToPlayer);
-            animState = "Idle_South"; // Change to "Walk_" + facingDir once you have walk sheets!
+            // --- TILE COLLISION (same 4-corner test the player uses) ---
+            sf::Vector2f candidate = currentPos + move;
+            bool blocked = false;
+
+            if (mapData.GetTileSizeX() > 0 && mapData.GetTileSizeY() > 0)
+            {
+                sf::FloatRect box(
+                    { candidate.x - enemyBoxSize.x / 2.f, candidate.y - enemyBoxSize.y / 2.f },
+                    { static_cast<float>(enemyBoxSize.x), static_cast<float>(enemyBoxSize.y) });
+
+                sf::Vector2f corners[4] = {
+                    { box.position.x, box.position.y },
+                    { box.position.x + box.size.x, box.position.y },
+                    { box.position.x, box.position.y + box.size.y },
+                    { box.position.x + box.size.x, box.position.y + box.size.y }
+                };
+
+                const auto& layout = mapData.GetData();
+
+                for (const auto& corner : corners)
+                {
+                    int gridX = static_cast<int>(corner.x / mapData.GetTileSizeX());
+                    int gridY = static_cast<int>(corner.y / mapData.GetTileSizeY());
+
+                    if (gridY >= 0 && gridY < static_cast<int>(layout.size()) &&
+                        gridX >= 0 && gridX < static_cast<int>(layout[gridY].size()))
+                    {
+                        if (mapData.IsTileSolid(layout[gridY][gridX]))
+                        {
+                            blocked = true;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!blocked)
+            {
+                currentPos = candidate;
+                enemySprite.setPosition(currentPos);
+            }
+
+            // Walk animation matching the chase direction
+            animState = "Walk_" + Math::Get8WayDirection(dirToPlayer);
         }
         else
         {
-            animState = "Idle_South";
+            animState = "Walk_South";
         }
     }
 

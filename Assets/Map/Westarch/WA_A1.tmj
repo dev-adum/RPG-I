@@ -34,31 +34,31 @@
          "name":"Triggers",
          "objects":[
                 {
-                 "height":30.5,
+                 "height":18.5,
                  "id":1,
                  "name":"Door",
                  "properties":[
                         {
                          "name":"spawnX",
                          "type":"float",
-                         "value":64
+                         "value":400
                         }, 
                         {
                          "name":"spawnY",
                          "type":"float",
-                         "value":128
+                         "value":464
                         }, 
                         {
                          "name":"targetMap",
                          "type":"string",
-                         "value":"Assets\/Maps\/WA_A2.json"
+                         "value":"Assets\/Map\/Westarch\/WA_A2.tmj"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":31,
-                 "x":448.288480635551,
-                 "y":256.931479642502
+                 "width":17.5,
+                 "x":454.788480635551,
+                 "y":262.931479642502
                 }],
          "opacity":1,
          "type":"objectgroup",

@@ -1,8 +1,10 @@
 #pragma once
 #include "Scene.h"
-#include "MapData.h"
-#include "MapLoader.h"
-#include "Player.h" // Include your actual player header
+#include "GameContext.h"
+#include "Map.h"
+#include "Player.h"
+#include "Enemy.h"
+#include "BulletSystem.h"
 #include <string>
 #include <SFML/Graphics.hpp>
 
@@ -11,15 +13,20 @@ class SceneManager;
 class GameplayScene : public Scene {
 private:
     SceneManager& m_sceneManager;
+    GameContext& m_context;
     std::string m_mapFilename;
-    sf::Vector2f spawnPos = { 100.f, 100.f };
-    MapData m_mapData;
-    MapLoader m_mapLoader;
 
-    Player m_player; // <--- Declare your player here!
+    Map m_map;
+    Player m_player;
+    Enemy m_enemy;
+    BulletSystem m_bullets;
+
+    bool m_doorTriggered = false;
 
 public:
-    GameplayScene(SceneManager& sceneManager, const std::string& mapFilename);
+    GameplayScene(SceneManager& sceneManager, GameContext& context,
+        const std::string& mapFilename,
+        sf::Vector2f spawnPoint = { -1.f, -1.f });
 
     void HandleInput() override;
     void Update(float dt) override;

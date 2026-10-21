@@ -51,7 +51,9 @@ void Player::Initialize()
     playerBox.setOutlineColor(sf::Color::Transparent);
     playerBox.setOutlineThickness(1);
     playerBox.setSize(sf::Vector2f(playerBoxSize.x, playerBoxSize.y));
-    playerBox.setOrigin({ 9,10 });
+    // Origin is the centre of the body, so playerBox.getPosition() IS the
+    // player's world position (no hidden offset).
+    playerBox.setOrigin({ playerBoxSize.x / 2.f, playerBoxSize.y / 2.f });
 
     playerSprite.setOrigin({ 32.f, 32.f });
     reticuleSprite.setOrigin({ 32.f, 32.f });
@@ -136,11 +138,23 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
     const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData)
 {
     sf::Vector2f pos = playerBox.getPosition();
-    isFiring = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
     bool isMoving = (dir.x != 0.f || dir.y != 0.f);
 
+    // Remember the last direction we actually moved, and face that way.
+    if (isMoving)
+        facingDir = Math::NormalizeVector(dir);
+
+    // Fire on Space (edge-triggered, so it fires once per press, not every frame)
+    const bool firePressed =
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) ||
+        sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+    isFiring = firePressed && !fireWasPressed;
+    fireWasPressed = firePressed;
+
     // --- CLEAN ANIMATION MAPPING VIA MATH ---
-    std::string directionName = Math::Get8WayDirection(aimDir);
+    // Animate along the facing direction (was: mouse aim direction)
+    std::string directionName = Math::Get8WayDirection(facingDir);
     std::string animPrefix = isFiring ? "Fire_" : "Walk_";
     std::string fullAnimName = animPrefix + directionName;
 
@@ -162,14 +176,14 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
         }
     }
 
-    // --- RETICULE ANIMATION ---
-    reticule_anim_timer += delta_time;
-    if (reticule_anim_timer >= reticule_anim_speed)
-    {
-        reticule_anim_timer = 0.f;
-        targ_idx = (targ_idx + 1) % Reticule.size();
-    }
-    reticuleSprite.setTextureRect(Reticule[targ_idx]);
+    // --- RETICULE ANIMATION (disabled: mouse aim removed) ---
+    //reticule_anim_timer += delta_time;
+    //if (reticule_anim_timer >= reticule_anim_speed)
+    //{
+    //    reticule_anim_timer = 0.f;
+    //    targ_idx = (targ_idx + 1) % Reticule.size();
+    //}
+    //reticuleSprite.setTextureRect(Reticule[targ_idx]);
 
     // --- AUDIO HANDLING ---
     if (isMoving)
@@ -190,18 +204,6 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
             walkSound.stop();
         }
     }
-
-    sf::Vector2f center = view.getCenter();
-    sf::Vector2f size = view.getSize();
-
-    float minX = center.x - size.x / 2.f;
-    float maxX = center.x + size.x / 2.f;
-    float minY = center.y - size.y / 2.f;
-    float maxY = center.y + size.y / 2.f;
-
-    float bodyW = 16.f;
-    float bodyH = 16.f;
-    float offsetY = 10.f / 2.f - bodyH / 2.f;
 
     sf::Vector2f move = dir * moveSpeed * delta_time;
 
@@ -261,24 +263,9 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
 
     pos = playerBox.getPosition();
 
-    float bodyLeft = pos.x - bodyW / 2.f;
-    float bodyTop = pos.y + offsetY - bodyH / 2.f;
-
-    if (bodyLeft < minX)
-        pos.x += (minX - bodyLeft);
-
-    if (bodyLeft + bodyW > maxX)
-        pos.x -= (bodyLeft + bodyW - maxX);
-
-    if (bodyTop < minY)
-        pos.y += (minY - bodyTop);
-
-    if (bodyTop + bodyH > maxY)
-        pos.y -= (bodyTop + bodyH - maxY);
-
     if (isFiring)
     {
-        bool fired = bulletSystem.Shoot(playerBox.getPosition(), aimDir);
+        bool fired = bulletSystem.Shoot(playerBox.getPosition(), facingDir);
 
         if (fired)
         {
@@ -298,6 +285,7 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
 void Player::Draw(sf::RenderWindow& window)
 {
     window.draw(playerSprite);
-    window.draw(reticuleSprite);
+    // Reticule disabled along with mouse aim
+    //window.draw(reticuleSprite);
     window.draw(playerBox);
 }

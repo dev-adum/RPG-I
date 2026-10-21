@@ -220,6 +220,7 @@ ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="BulletSystem.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameplayScene.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Map.h" />

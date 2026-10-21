@@ -9,5 +9,12 @@ sf::Vector2f Input::GetMovement()
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) dir.x -= 1.f;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) dir.x += 1.f;
 
+    // Sprint while Shift is held
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift) ||
+        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RShift))
+    {
+        dir *= sprintMultiplier;
+    }
+
     return dir;
 }

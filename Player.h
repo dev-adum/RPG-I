@@ -64,4 +64,10 @@ public:
 
     bool isFiring = false;
     float bulletVolume = 20.f;
+
+    // --- AIM REPLACEMENT ---
+    // Direction the player is facing (last non-zero movement direction).
+    // Spacebar fires along this instead of the old mouse-driven aim.
+    sf::Vector2f facingDir = { 1.f, 0.f };
+    bool fireWasPressed = false;
 };
