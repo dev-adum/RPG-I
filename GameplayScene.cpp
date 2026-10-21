@@ -1,6 +1,7 @@
 #include "GameplayScene.h"
 #include "SceneManager.h"
 #include "Math.h"
+#include "Assets.h"
 #include <iostream>
 #include <memory>
 
@@ -8,7 +9,11 @@ GameplayScene::GameplayScene(SceneManager& sceneManager, GameContext& context,
     const std::string& mapFilename, sf::Vector2f spawnPoint)
     : m_sceneManager(sceneManager), m_context(context), m_mapFilename(mapFilename)
 {
-    m_map.Load(m_mapFilename);
+    // Root the map path here so every caller is covered: main.cpp passes an
+    // already-rooted path (passes through unchanged), while door transitions
+    // pass the relative targetMap straight from the .tmj. AssetPaths::Path()
+    // is idempotent, so both work.
+    m_map.Load(AssetPaths::Path(m_mapFilename));
 
     m_player.Load();
     m_player.Initialize();

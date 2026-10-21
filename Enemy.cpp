@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Assets.h"
 
 Enemy::Enemy()
     : enemySprite(idleTexture),
@@ -8,17 +9,17 @@ Enemy::Enemy()
 
 void Enemy::Load()
 {
-    if (!idleTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Walk.png"))
+    if (!idleTexture.loadFromFile(AssetPaths::Path("Assets/Enemy/Textures/Enemy_Walk.png")))
     {
         std::cout << "Failed to load Enemy_Walk.png\n";
     }
 
-    if (!hitTexture.loadFromFile("Assets/Enemy/Textures/Enemy_Hit.png"))
+    if (!hitTexture.loadFromFile(AssetPaths::Path("Assets/Enemy/Textures/Enemy_Hit.png")))
     {
         std::cout << "Failed to load Enemy_Hit.png\n";
     }
 
-    if (!hitBuffer1.loadFromFile("Assets/Enemy/SFX/Enemy_Hit.wav"))
+    if (!hitBuffer1.loadFromFile(AssetPaths::Path("Assets/Enemy/SFX/Enemy_Hit.wav")))
     {
         std::cout << "Failed to load Enemy_Hit.wav\n";
     }

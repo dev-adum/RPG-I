@@ -1,4 +1,5 @@
 #include "Map.h"
+#include "Assets.h"
 
 Map::Map()
 {
@@ -10,7 +11,7 @@ Map::~Map()
 
 void Map::Initialize()
 {
-    Load("Assets/Map/Westarch/WA_A1.tmj");
+    Load(AssetPaths::Path("Assets/Map/Westarch/WA_A1.tmj"));
 }
 
 void Map::Update(float delta_time)
@@ -23,7 +24,10 @@ void Map::Load(const std::string& mapFile)
     MapLoader loader;
     loader.Load(mapFile, md);
 
-    if (!tilesheetTexture.loadFromFile(md.GetTilesheet()))
+    // md.GetTilesheet() is built by MapLoader from the map path we were given,
+    // so if that path was rooted with AssetPaths::Path(), this is already
+    // absolute. AssetPaths::Path() is idempotent, so this is safe either way.
+    if (!tilesheetTexture.loadFromFile(AssetPaths::Path(md.GetTilesheet())))
     {
         std::cout << "Tilesheet failed to load: " << md.GetTilesheet() << std::endl;
         return;

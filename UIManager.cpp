@@ -1,9 +1,10 @@
 #include "UIManager.h"
+#include "Assets.h"
 #include <iostream>
 
 void UIManager::Load()
 {
-    if (!font.openFromFile("Assets/Fonts/Helvetica.ttf"))
+    if (!font.openFromFile(AssetPaths::Path("Assets/Fonts/Helvetica.ttf")))
     {
         std::cout << "Failed to load font\n";
     }

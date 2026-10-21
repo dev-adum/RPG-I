@@ -6,6 +6,7 @@
 #include "GameContext.h"
 #include "SceneManager.h"
 #include "GameplayScene.h"
+#include "Assets.h"
 
 int main()
 {
@@ -28,7 +29,7 @@ int main()
     UIManager ui;
     sf::Music music;
 
-    if (!music.openFromFile("Assets/Music/Void/VoidTrack.wav"))
+    if (!music.openFromFile(AssetPaths::Path("Assets/Music/Void/VoidTrack.wav")))
         std::cout << "Failed to load VoidTrack.wav\n";
     music.setLooping(true);
     music.play();
@@ -42,7 +43,7 @@ int main()
     GameContext context{ window, gameView, input, ui, music };
 
     SceneManager scenes;
-    scenes.ChangeScene<GameplayScene>(scenes, context, "Assets/Map/Westarch/WA_A1.tmj");
+    scenes.ChangeScene<GameplayScene>(scenes, context, AssetPaths::Path("Assets/Map/Westarch/WA_A1.tmj"));
 
     float fpsTimer = 0.f;
     int frameCount = 0;

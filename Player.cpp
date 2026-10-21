@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Assets.h"
 
 Player::Player()
     : playerSprite(playerTexture),
@@ -11,17 +12,17 @@ Player::Player()
 
 void Player::Load()
 {
-    if (!playerTexture.loadFromFile("Assets/Player/Textures/Player_Walk.png"))
+    if (!playerTexture.loadFromFile(AssetPaths::Path("Assets/Player/Textures/Player_Walk.png")))
     {
         std::cout << "Failed to load Player_Walk.png\n";
     }
 
-    if (!reticuleTexture.loadFromFile("Assets/Player/Textures/Reticule_Mark.png"))
+    if (!reticuleTexture.loadFromFile(AssetPaths::Path("Assets/Player/Textures/Reticule_Mark.png")))
     {
         std::cout << "Failed to load Reticule_Mark.png\n";
     }
 
-    if (!walkBuffer.loadFromFile("Assets/Player/SFX/Player_Step.wav"))
+    if (!walkBuffer.loadFromFile(AssetPaths::Path("Assets/Player/SFX/Player_Step.wav")))
     {
         std::cout << "Failed to load Player_Step.wav\n";
     }
@@ -29,12 +30,12 @@ void Player::Load()
     walkSound.setBuffer(walkBuffer);
     walkSound.setLooping(true);
 
-    if (!fireBuffer1.loadFromFile("Assets/Player/SFX/Bang_1.wav"))
+    if (!fireBuffer1.loadFromFile(AssetPaths::Path("Assets/Player/SFX/Bang_1.wav")))
     {
         std::cout << "Failed to load Bang_1.wav\n";
     }
 
-    if (!fireBuffer2.loadFromFile("Assets/Player/SFX/Bang_2.wav"))
+    if (!fireBuffer2.loadFromFile(AssetPaths::Path("Assets/Player/SFX/Bang_2.wav")))
     {
         std::cout << "Failed to load Bang_2.wav\n";
     }
