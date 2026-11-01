@@ -1,2 +1,5 @@
 ﻿.vs
 Build/x64/*/intermediate/
+
+# Prebuilt Jolt libs (~92 MB). Run build_jolt.ps1 to generate them.
+dependencies/JoltPhysics/lib/

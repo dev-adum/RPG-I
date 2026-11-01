@@ -10,7 +10,17 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ 500, 500 }), "Level I");
+    // The 3D dice scene needs a depth buffer, and SFML's defaults request
+    // none (depthBits is 0). The settings also have to be passed to every
+    // create() call, because recreating the window for fullscreen would
+    // otherwise silently drop the depth buffer again.
+    sf::ContextSettings windowSettings;
+    windowSettings.depthBits = 24;
+    windowSettings.stencilBits = 8;
+    windowSettings.antiAliasingLevel = 4;
+
+    sf::RenderWindow window(sf::VideoMode({ 500, 500 }), "Level I",
+        sf::Style::Default, sf::State::Windowed, windowSettings);
     window.setVerticalSyncEnabled(true);
     window.setMouseCursorVisible(false);
     window.setMouseCursorGrabbed(true);
@@ -36,8 +46,9 @@ int main()
     music.setVolume(20);
 
     ui.Load();
-    ui.AddText("Aim reticule with the mouse\nMove: WASD\nFire: LMB", 11, { 10.f, 10.f });
-    ui.AddText("FPS: 0", 14, { 200.f, 20.f });
+    ui.AddText(
+        "Move: WASD\nFire: LMB or 'Space'\nRun: WASD+Shift\nMenu: 'M'\nFullscreen: 'F11'/'Esc'\nDice test: 'F'\nMagnet: hold 'E'\nOrbit: hold MMB", 11, { 10.f, 10.f });
+    ui.AddText("FPS: 0", 18, { 200.f, 20.f });
     ui.fpsTextIndex = 1;
 
     GameContext context{ window, gameView, input, ui, music };
@@ -52,9 +63,19 @@ int main()
 
     while (window.isOpen())
     {
+        // Clear this frame's discrete presses BEFORE polling, so
+        // HandleEvent() can set them during the poll below.
+        input.BeginFrame();
+
         //--- events ---
+        // Poll only: record input here, but do NOT act on discrete presses
+        // inside this loop. An action like window.create() can queue further
+        // events, and the flag stays set for the whole frame - checking it
+        // per-event would fire it many times per press.
         while (const std::optional event = window.pollEvent())
         {
+            input.HandleEvent(*event);
+
             if (event->is<sf::Event::Closed>())
                 window.close();
 
@@ -65,37 +86,37 @@ int main()
                 music.pause();
             if (event->is<sf::Event::FocusGained>())
                 music.play();
+        }
 
-            if (const auto* key = event->getIf<sf::Event::KeyPressed>())
+        //--- discrete actions: once per frame, after polling ---
+        if (input.WasFullscreenPressed())
+        {
+            if (window.getSize() == sf::VideoMode::getDesktopMode().size)
+                window.create(sf::VideoMode({ 500, 500 }), "Level I",
+                    sf::Style::Default, sf::State::Windowed, windowSettings);
+            else
+                window.create(sf::VideoMode::getDesktopMode(), "Level I",
+                    sf::Style::Default, sf::State::Fullscreen, windowSettings);
+
+            window.setVerticalSyncEnabled(true);
+            window.setMouseCursorVisible(false);
+            window.setMouseCursorGrabbed(true);
+            updateView();
+        }
+        else if (input.WasEscapePressed() && !scenes.CurrentSceneConsumesEscape())
+        {
+            if (window.getSize() == sf::VideoMode::getDesktopMode().size)
             {
-                if (key->code == sf::Keyboard::Key::F11)
-                {
-                    if (window.getSize() == sf::VideoMode::getDesktopMode().size)
-                        window.create(sf::VideoMode({ 500, 500 }), "Level I");
-                    else
-                        window.create(sf::VideoMode::getDesktopMode(), "Level I",
-                            sf::Style::Default, sf::State::Fullscreen);
-
-                    window.setVerticalSyncEnabled(true);
-                    window.setMouseCursorVisible(false);
-                    window.setMouseCursorGrabbed(true);
-                    updateView();
-                }
-                else if (key->code == sf::Keyboard::Key::Escape)
-                {
-                    if (window.getSize() == sf::VideoMode::getDesktopMode().size)
-                    {
-                        window.create(sf::VideoMode({ 500, 500 }), "Level I");
-                        window.setVerticalSyncEnabled(true);
-                        window.setMouseCursorVisible(false);
-                        window.setMouseCursorGrabbed(true);
-                        updateView();
-                    }
-                    else
-                    {
-                        window.close();
-                    }
-                }
+                window.create(sf::VideoMode({ 500, 500 }), "Level I",
+                    sf::Style::Default, sf::State::Windowed, windowSettings);
+                window.setVerticalSyncEnabled(true);
+                window.setMouseCursorVisible(false);
+                window.setMouseCursorGrabbed(true);
+                updateView();
+            }
+            else
+            {
+                window.close();
             }
         }
 
@@ -123,6 +144,7 @@ int main()
         //--- draw ---
         window.clear();
         scenes.Render(window);
+        scenes.RenderFade(window);
         window.setView(window.getDefaultView());
         ui.texts[ui.fpsTextIndex].setString("FPS: " + std::to_string(fps));
         ui.Draw(window);

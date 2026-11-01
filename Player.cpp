@@ -136,7 +136,8 @@ sf::Vector2f Player::GetSmoothedAim(sf::RenderWindow& window, const sf::View& vi
 }
 
 void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
-    const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData)
+    const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData,
+    const Input& input)
 {
     sf::Vector2f pos = playerBox.getPosition();
 
@@ -146,12 +147,8 @@ void Player::Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time,
     if (isMoving)
         facingDir = Math::NormalizeVector(dir);
 
-    // Fire on Space (edge-triggered, so it fires once per press, not every frame)
-    const bool firePressed =
-        sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space) ||
-        sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-    isFiring = firePressed && !fireWasPressed;
-    fireWasPressed = firePressed;
+    // Firing is edge-triggered by Input (once per press, not every frame).
+    isFiring = input.IsFiring();
 
     // --- CLEAN ANIMATION MAPPING VIA MATH ---
     // Animate along the facing direction (was: mouse aim direction)

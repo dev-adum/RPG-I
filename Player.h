@@ -7,6 +7,7 @@
 #include "BulletSystem.h"
 #include "MapData.h"
 #include "Animation.h" 
+#include "Input.h"
 
 class Enemy;
 
@@ -17,7 +18,7 @@ public:
 
     void Load();
     void Initialize();
-    void Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData);
+    void Update(sf::Vector2f dir, sf::Vector2f aimDir, float delta_time, const sf::View& view, Enemy& enemy, BulletSystem& bulletSystem, const MapData& mapData, const Input& input);
     void Draw(sf::RenderWindow& window);
 
     // Clean position getter using your authoritative hitbox
@@ -69,5 +70,4 @@ public:
     // Direction the player is facing (last non-zero movement direction).
     // Spacebar fires along this instead of the old mouse-driven aim.
     sf::Vector2f facingDir = { 1.f, 0.f };
-    bool fireWasPressed = false;
 };
