@@ -1,0 +1,40 @@
+{
+  "clips": [
+    {
+      "fps": 10.0,
+      "frames": [
+        [
+          0,
+          0,
+          64,
+          64
+        ],
+        [
+          64,
+          0,
+          64,
+          64
+        ],
+        [
+          128,
+          0,
+          64,
+          64
+        ],
+        [
+          192,
+          0,
+          64,
+          64
+        ]
+      ],
+      "loop": true,
+      "name": "Row 1"
+    }
+  ],
+  "format": "rpg-i-clips",
+  "frameHeight": 64,
+  "frameWidth": 64,
+  "sheet": "Assets/enemy/textures/enemy_hit.png",
+  "version": 1
+}

@@ -1,5 +1,18 @@
-﻿.vs
-Build/x64/*/intermediate/
+﻿# Player commit: only the Release exe and Assets are tracked.
+# Everything else is ignored, including source and dependencies. Collaborators
+# download the dependencies separately, from the list kept outside the repo.
+*
 
-# Prebuilt Jolt libs (~92 MB). Run build_jolt.ps1 to generate them.
-dependencies/JoltPhysics/lib/
+# Keep this file itself.
+!.gitignore
+
+# Game assets.
+!Assets/
+!Assets/**
+
+# The Release build a player runs. Ignore its debug symbols and other outputs.
+!Build/
+!Build/x64/
+!Build/x64/Release/
+!Build/x64/Release/bin/
+!Build/x64/Release/bin/RPG-I.exe

@@ -1,0 +1,63 @@
+{
+  "clips": [
+    {
+      "fps": 12.5,
+      "frames": [[0, 0, 64, 64], [64, 0, 64, 64], [128, 0, 64, 64], [192, 0, 64, 64]],
+      "loop": true,
+      "name": "Hit_South"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[384, 0, 64, 64], [448, 0, 64, 64]],
+      "loop": true,
+      "name": "Walk_East"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[128, 64, 64, 64], [192, 64, 64, 64]],
+      "loop": true,
+      "name": "Walk_North"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[0, 64, 64, 64], [64, 64, 64, 64]],
+      "loop": true,
+      "name": "Walk_NorthEast"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[256, 64, 64, 64], [320, 64, 64, 64]],
+      "loop": true,
+      "name": "Walk_NorthWest"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[128, 0, 64, 64], [192, 0, 64, 64]],
+      "loop": true,
+      "name": "Walk_South"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[256, 0, 64, 64], [320, 0, 64, 64]],
+      "loop": true,
+      "name": "Walk_SouthEast"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[0, 0, 64, 64], [64, 0, 64, 64]],
+      "loop": true,
+      "name": "Walk_SouthWest"
+    },
+    {
+      "fps": 10.0,
+      "frames": [[384, 64, 64, 64], [448, 64, 64, 64]],
+      "loop": true,
+      "name": "Walk_West"
+    }
+  ],
+  "format": "rpg-i-clips",
+  "frameHeight": 64,
+  "frameWidth": 64,
+  "sheet": "Assets/enemy/textures/enemy_walk.png",
+  "version": 1
+}
